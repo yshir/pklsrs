@@ -39,5 +39,11 @@ assert "6 / 3" "2"
 assert "(1 + 2 * (3 + 4)) / 3" "5"
 assert "+ 1" "1"
 assert "- 1 + 3" "2"
+assert "1 == 1" "1"
+assert "1 == 2" "0"
+assert "1 != 1" "0"
+assert "1 != 2" "1"
+assert "1 == 1 == 1" "1"
+assert "1 == 1 != 1" "0"
 
 echo OK

@@ -54,5 +54,23 @@ fn gen_expr(expr: &Expr) {
             println!("    sdiv x0, x1, x2");
             println!("    str x0, [sp, #-16]! // push x0");
         }
+        Expr::Eq { lhs, rhs } => {
+            gen_expr(lhs);
+            gen_expr(rhs);
+            println!("    ldr x2, [sp], #16 // pop x2");
+            println!("    ldr x1, [sp], #16 // pop x1");
+            println!("    cmp x1, x2");
+            println!("    cset x0, eq");
+            println!("    str x0, [sp, #-16]! // push x0");
+        }
+        Expr::Ne { lhs, rhs } => {
+            gen_expr(lhs);
+            gen_expr(rhs);
+            println!("    ldr x2, [sp], #16 // pop x2");
+            println!("    ldr x1, [sp], #16 // pop x1");
+            println!("    cmp x1, x2");
+            println!("    cset x0, ne");
+            println!("    str x0, [sp, #-16]! // push x0");
+        }
     }
 }

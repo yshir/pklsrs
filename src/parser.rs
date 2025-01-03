@@ -11,6 +11,8 @@ pub enum Expr {
     Sub { lhs: Box<Expr>, rhs: Box<Expr> },
     Mul { lhs: Box<Expr>, rhs: Box<Expr> },
     Div { lhs: Box<Expr>, rhs: Box<Expr> },
+    Eq { lhs: Box<Expr>, rhs: Box<Expr> },
+    Ne { lhs: Box<Expr>, rhs: Box<Expr> },
 }
 
 pub fn parse(tokens: Vec<Token>) -> Expr {
@@ -18,9 +20,36 @@ pub fn parse(tokens: Vec<Token>) -> Expr {
     parse_expr(&mut tokens)
 }
 
-/// expr := add
+/// expr := equal
 fn parse_expr(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
-    parse_add(tokens)
+    parse_equal(tokens)
+}
+
+/// equal := add ('=='|'!=' add)*
+fn parse_equal(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
+    let mut expr = parse_add(tokens);
+
+    while let Some(token) = tokens.peek() {
+        match token {
+            Token::Eq => {
+                tokens.next();
+                expr = Expr::Eq {
+                    lhs: Box::new(expr),
+                    rhs: Box::new(parse_add(tokens)),
+                }
+            }
+            Token::Ne => {
+                tokens.next();
+                expr = Expr::Ne {
+                    lhs: Box::new(expr),
+                    rhs: Box::new(parse_add(tokens)),
+                }
+            }
+            _ => break,
+        }
+    }
+
+    expr
 }
 
 /// add := mul ('+'|'-' mul)*
