@@ -16,6 +16,12 @@ fn gen_expr(expr: &Expr) {
             println!("    mov x0, {}", n);
             println!("    str x0, [sp, #-16]! // push x0");
         }
+        Expr::Neg(e) => {
+            gen_expr(e);
+            println!("    ldr x0, [sp], #16 // pop x1");
+            println!("    neg x0, x0");
+            println!("    str x0, [sp, #-16]! // push x0");
+        }
         Expr::Add { lhs, rhs } => {
             gen_expr(lhs);
             gen_expr(rhs);

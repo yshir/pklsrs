@@ -37,5 +37,7 @@ assert "100 - 10 + 1" "91"
 assert "2 * 3" "6"
 assert "6 / 3" "2"
 assert "(1 + 2 * (3 + 4)) / 3" "5"
+assert "+ 1" "1"
+assert "- 1 + 3" "2"
 
 echo OK

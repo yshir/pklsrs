@@ -6,6 +6,7 @@ use crate::tokenizer::Token;
 #[derive(Debug)]
 pub enum Expr {
     Number(i32),
+    Neg(Box<Expr>),
     Add { lhs: Box<Expr>, rhs: Box<Expr> },
     Sub { lhs: Box<Expr>, rhs: Box<Expr> },
     Mul { lhs: Box<Expr>, rhs: Box<Expr> },
@@ -49,9 +50,9 @@ fn parse_add(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
     expr
 }
 
-/// mul := primary ('*'|'/' primary)*
+/// mul := unary ('*'|'/' unary)*
 fn parse_mul(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
-    let mut expr = parse_primary(tokens);
+    let mut expr = parse_unary(tokens);
 
     while let Some(token) = tokens.peek() {
         match token {
@@ -59,14 +60,14 @@ fn parse_mul(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
                 tokens.next();
                 expr = Expr::Mul {
                     lhs: Box::new(expr),
-                    rhs: Box::new(parse_primary(tokens)),
+                    rhs: Box::new(parse_unary(tokens)),
                 }
             }
             Token::Slash => {
                 tokens.next();
                 expr = Expr::Div {
                     lhs: Box::new(expr),
-                    rhs: Box::new(parse_primary(tokens)),
+                    rhs: Box::new(parse_unary(tokens)),
                 }
             }
             _ => break,
@@ -74,6 +75,22 @@ fn parse_mul(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
     }
 
     expr
+}
+
+/// unary := ('-'|'+')? primary
+fn parse_unary(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
+    let token = tokens.peek().unwrap();
+    match token {
+        Token::Minus => {
+            tokens.next();
+            Expr::Neg(Box::new(parse_primary(tokens)))
+        }
+        Token::Plus => {
+            tokens.next();
+            parse_primary(tokens)
+        }
+        _ => parse_primary(tokens),
+    }
 }
 
 /// primary := number | '(' expr ')'
