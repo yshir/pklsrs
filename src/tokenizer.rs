@@ -1,6 +1,7 @@
 #[derive(Debug)]
 pub enum Token {
     Number(i32),
+    Ident(String),
     Plus,
     Minus,
     Asterisk,
@@ -13,6 +14,7 @@ pub enum Token {
     Lte,
     Gt,
     Gte,
+    Assign,
     Eof,
 }
 
@@ -43,13 +45,13 @@ pub fn tokenize(input: &str) -> Vec<Token> {
                 }
                 _ => tokens.push(Token::Gt),
             },
-            '=' => {
-                let c = chars.next().unwrap();
-                match c {
-                    '=' => tokens.push(Token::Eq),
-                    _ => panic!("unexpected character: {}", c),
+            '=' => match chars.peek() {
+                Some('=') => {
+                    chars.next();
+                    tokens.push(Token::Eq);
                 }
-            }
+                _ => tokens.push(Token::Assign),
+            },
             '!' => {
                 let c = chars.next().unwrap();
                 match c {
@@ -66,6 +68,16 @@ pub fn tokenize(input: &str) -> Vec<Token> {
                     }
                 }
                 tokens.push(Token::Number(num.parse().unwrap()))
+            }
+            'a'..='z' | 'A'..='Z' | '_' => {
+                let mut str = c.to_string();
+                while let Some(c) = chars.peek() {
+                    match c {
+                        'a'..='z' | 'A'..='Z' | '0'..='9' | '_' => str.push(chars.next().unwrap()),
+                        _ => break,
+                    }
+                }
+                tokens.push(Token::Ident(str))
             }
             _ => panic!("unexpected character: {}", c),
         }

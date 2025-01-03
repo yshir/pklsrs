@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::parser::Expr;
 
 pub fn codegen(expr: &Expr) {
@@ -15,6 +17,9 @@ fn gen_expr(expr: &Expr) {
         Expr::Number(n) => {
             println!("    mov x0, {}", n);
             println!("    str x0, [sp, #-16]! // push x0");
+        }
+        Expr::Var(_) => {
+            //
         }
         Expr::Neg(e) => {
             gen_expr(e);
@@ -90,5 +95,11 @@ fn gen_expr(expr: &Expr) {
             println!("    cset x0, le");
             println!("    str x0, [sp, #-16]! // push x0");
         }
+        Expr::Assign { lhs, rhs } => match lhs.deref() {
+            Expr::Var(_) => {
+                gen_expr(rhs);
+            }
+            _ => panic!("unexpected expr: {:?}", lhs),
+        },
     }
 }

@@ -69,5 +69,9 @@ assert "1 + 2 < 2" "0"
 assert "1 + 2 <= 2" "0"
 assert "1 + 2 > 2" "1"
 assert "1 + 2 >= 2" "1"
+assert "a = 1" "1"
+assert "a = 2" "2"
+assert "a = 1 + 2" "3"
+assert "(a = 1 + 2) * 3" "9"
 
 echo OK

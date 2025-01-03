@@ -15,6 +15,8 @@ pub enum Expr {
     Ne { lhs: Box<Expr>, rhs: Box<Expr> },
     Lt { lhs: Box<Expr>, rhs: Box<Expr> },
     Lte { lhs: Box<Expr>, rhs: Box<Expr> },
+    Var(String),
+    Assign { lhs: Box<Expr>, rhs: Box<Expr> },
 }
 
 pub fn parse(tokens: Vec<Token>) -> Expr {
@@ -22,9 +24,24 @@ pub fn parse(tokens: Vec<Token>) -> Expr {
     parse_expr(&mut tokens)
 }
 
-/// expr := equal
+/// expr := assign
 fn parse_expr(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
-    parse_equal(tokens)
+    parse_assign(tokens)
+}
+
+/// assign := equal ('=' assign)?
+fn parse_assign(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
+    let mut expr = parse_equal(tokens);
+
+    if let Some(Token::Assign) = tokens.peek() {
+        tokens.next();
+        expr = Expr::Assign {
+            lhs: Box::new(expr),
+            rhs: Box::new(parse_assign(tokens)),
+        }
+    }
+
+    expr
 }
 
 /// equal := compare ('=='|'!=' compare)*
@@ -165,7 +182,7 @@ fn parse_unary(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
     }
 }
 
-/// primary := number | '(' expr ')'
+/// primary := number | ident | '(' expr ')'
 fn parse_primary(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
     let token = tokens.peek().unwrap();
     match token {
@@ -179,6 +196,7 @@ fn parse_primary(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
             }
         }
         Token::Number(_) => parse_number(tokens),
+        Token::Ident(_) => parse_var(tokens),
         _ => panic!("unexpected token: {:?}", token),
     }
 }
@@ -189,6 +207,15 @@ fn parse_number(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
 
     match token {
         Token::Number(n) => Expr::Number(*n),
+        _ => panic!("unexpected token: {:?}", token),
+    }
+}
+
+fn parse_var(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
+    let token = tokens.next().unwrap();
+
+    match token {
+        Token::Ident(s) => Expr::Var(s.clone()),
         _ => panic!("unexpected token: {:?}", token),
     }
 }
