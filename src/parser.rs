@@ -49,9 +49,9 @@ fn parse_add(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
     expr
 }
 
-/// mul := number ('*'|'/' number)*
+/// mul := primary ('*'|'/' primary)*
 fn parse_mul(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
-    let mut expr = parse_number(tokens);
+    let mut expr = parse_primary(tokens);
 
     while let Some(token) = tokens.peek() {
         match token {
@@ -59,14 +59,14 @@ fn parse_mul(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
                 tokens.next();
                 expr = Expr::Mul {
                     lhs: Box::new(expr),
-                    rhs: Box::new(parse_number(tokens)),
+                    rhs: Box::new(parse_primary(tokens)),
                 }
             }
             Token::Slash => {
                 tokens.next();
                 expr = Expr::Div {
                     lhs: Box::new(expr),
-                    rhs: Box::new(parse_number(tokens)),
+                    rhs: Box::new(parse_primary(tokens)),
                 }
             }
             _ => break,
@@ -74,6 +74,24 @@ fn parse_mul(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
     }
 
     expr
+}
+
+/// primary := number | '(' expr ')'
+fn parse_primary(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
+    let token = tokens.peek().unwrap();
+    match token {
+        Token::LParen => {
+            tokens.next();
+            let expr = parse_expr(tokens);
+            let token = tokens.next().unwrap();
+            match token {
+                Token::RParen => expr,
+                _ => panic!("unexpected token: {:?}", token),
+            }
+        }
+        Token::Number(_) => parse_number(tokens),
+        _ => panic!("unexpected token: {:?}", token),
+    }
 }
 
 /// number := [0-9]+
