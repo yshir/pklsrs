@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -feuo pipefail
 
 DIR=`dirname $0`
 
@@ -34,5 +34,7 @@ assert "1 - 1" "0"
 assert "10 - 1" "9"
 assert "100 - 10 - 1" "89"
 assert "100 - 10 + 1" "91"
+assert "2 * 3" "6"
+assert "6 / 3" "2"
 
 echo OK

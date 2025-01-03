@@ -3,6 +3,8 @@ pub enum Token {
     Number(i32),
     Plus,
     Minus,
+    Asterisk,
+    Slash,
     Eof,
 }
 
@@ -15,6 +17,8 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             ' ' | '\t' | '\n' => {}
             '+' => tokens.push(Token::Plus),
             '-' => tokens.push(Token::Minus),
+            '*' => tokens.push(Token::Asterisk),
+            '/' => tokens.push(Token::Slash),
             '0'..='9' => {
                 let mut num = c.to_string();
                 while let Some(c) = chars.peek() {
