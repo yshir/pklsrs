@@ -1,10 +1,10 @@
+use pklsrs::{codegen::codegen, parser::parse, tokenizer::tokenize};
+
 fn main() {
     let program = stdio();
-
-    println!(".global _main");
-    println!("_main:");
-    println!("    mov x0, {}", program);
-    println!("    ret");
+    let tokens = tokenize(&program);
+    let expr = parse(tokens);
+    codegen(&expr);
 }
 
 fn stdio() -> String {
