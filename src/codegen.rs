@@ -72,5 +72,23 @@ fn gen_expr(expr: &Expr) {
             println!("    cset x0, ne");
             println!("    str x0, [sp, #-16]! // push x0");
         }
+        Expr::Lt { lhs, rhs } => {
+            gen_expr(lhs);
+            gen_expr(rhs);
+            println!("    ldr x2, [sp], #16 // pop x2");
+            println!("    ldr x1, [sp], #16 // pop x1");
+            println!("    cmp x1, x2");
+            println!("    cset x0, lt");
+            println!("    str x0, [sp, #-16]! // push x0");
+        }
+        Expr::Lte { lhs, rhs } => {
+            gen_expr(lhs);
+            gen_expr(rhs);
+            println!("    ldr x2, [sp], #16 // pop x2");
+            println!("    ldr x1, [sp], #16 // pop x1");
+            println!("    cmp x1, x2");
+            println!("    cset x0, le");
+            println!("    str x0, [sp, #-16]! // push x0");
+        }
     }
 }

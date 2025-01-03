@@ -9,6 +9,10 @@ pub enum Token {
     RParen,
     Eq,
     Ne,
+    Lt,
+    Lte,
+    Gt,
+    Gte,
     Eof,
 }
 
@@ -25,6 +29,20 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             '/' => tokens.push(Token::Slash),
             '(' => tokens.push(Token::LParen),
             ')' => tokens.push(Token::RParen),
+            '<' => match chars.peek() {
+                Some('=') => {
+                    chars.next();
+                    tokens.push(Token::Lte);
+                }
+                _ => tokens.push(Token::Lt),
+            },
+            '>' => match chars.peek() {
+                Some('=') => {
+                    chars.next();
+                    tokens.push(Token::Gte);
+                }
+                _ => tokens.push(Token::Gt),
+            },
             '=' => {
                 let c = chars.next().unwrap();
                 match c {

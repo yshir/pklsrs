@@ -13,6 +13,8 @@ pub enum Expr {
     Div { lhs: Box<Expr>, rhs: Box<Expr> },
     Eq { lhs: Box<Expr>, rhs: Box<Expr> },
     Ne { lhs: Box<Expr>, rhs: Box<Expr> },
+    Lt { lhs: Box<Expr>, rhs: Box<Expr> },
+    Lte { lhs: Box<Expr>, rhs: Box<Expr> },
 }
 
 pub fn parse(tokens: Vec<Token>) -> Expr {
@@ -25,9 +27,9 @@ fn parse_expr(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
     parse_equal(tokens)
 }
 
-/// equal := add ('=='|'!=' add)*
+/// equal := compare ('=='|'!=' compare)*
 fn parse_equal(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
-    let mut expr = parse_add(tokens);
+    let mut expr = parse_compare(tokens);
 
     while let Some(token) = tokens.peek() {
         match token {
@@ -35,14 +37,55 @@ fn parse_equal(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
                 tokens.next();
                 expr = Expr::Eq {
                     lhs: Box::new(expr),
-                    rhs: Box::new(parse_add(tokens)),
+                    rhs: Box::new(parse_compare(tokens)),
                 }
             }
             Token::Ne => {
                 tokens.next();
                 expr = Expr::Ne {
                     lhs: Box::new(expr),
+                    rhs: Box::new(parse_compare(tokens)),
+                }
+            }
+            _ => break,
+        }
+    }
+
+    expr
+}
+
+/// compare := add ('<'|'<='|'>'|'>=' add)*
+fn parse_compare(tokens: &mut Peekable<Iter<'_, Token>>) -> Expr {
+    let mut expr = parse_add(tokens);
+
+    while let Some(token) = tokens.peek() {
+        match token {
+            Token::Lt => {
+                tokens.next();
+                expr = Expr::Lt {
+                    lhs: Box::new(expr),
                     rhs: Box::new(parse_add(tokens)),
+                }
+            }
+            Token::Lte => {
+                tokens.next();
+                expr = Expr::Lte {
+                    lhs: Box::new(expr),
+                    rhs: Box::new(parse_add(tokens)),
+                }
+            }
+            Token::Gt => {
+                tokens.next();
+                expr = Expr::Lt {
+                    lhs: Box::new(parse_add(tokens)),
+                    rhs: Box::new(expr),
+                }
+            }
+            Token::Gte => {
+                tokens.next();
+                expr = Expr::Lte {
+                    lhs: Box::new(parse_add(tokens)),
+                    rhs: Box::new(expr),
                 }
             }
             _ => break,
