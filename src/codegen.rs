@@ -8,9 +8,23 @@ pub fn codegen(expr: &Expr) {
 }
 
 fn gen_expr(expr: &Expr) {
+    println!("// {:?}", expr);
+
     match expr {
         Expr::Number(n) => {
             println!("    mov x0, {}", n);
+        }
+        Expr::Add { lhs, rhs } => {
+            gen_expr(lhs);
+            println!("    mov x1, x0");
+            gen_expr(rhs);
+            println!("    add x0, x1, x0");
+        }
+        Expr::Sub { lhs, rhs } => {
+            gen_expr(lhs);
+            println!("    mov x1, x0");
+            gen_expr(rhs);
+            println!("    sub x0, x1, x0");
         }
     }
 }

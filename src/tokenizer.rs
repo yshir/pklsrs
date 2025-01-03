@@ -1,6 +1,8 @@
 #[derive(Debug)]
 pub enum Token {
     Number(i32),
+    Plus,
+    Minus,
     Eof,
 }
 
@@ -11,6 +13,8 @@ pub fn tokenize(input: &str) -> Vec<Token> {
     while let Some(c) = chars.next() {
         match c {
             ' ' | '\t' | '\n' => {}
+            '+' => tokens.push(Token::Plus),
+            '-' => tokens.push(Token::Minus),
             '0'..='9' => {
                 let mut num = c.to_string();
                 while let Some(c) = chars.peek() {
